@@ -39,10 +39,17 @@ import time
 from tqdm import tqdm
 from selenium.webdriver.common.by import By
 
+lock = multiprocessing.Lock()   
+
+tabela = {
+        'Time':[],'País':[],'Gols':[],'Jogos':[], 'Média em casa':[],
+        'Média fora':[], 'Média geral':[]
+    }
+
 def scrapping(links):    
-    lock = multiprocessing.Lock()
     wd_Chrome.get("https://www.flashscore.com/") 
     time.sleep(2)
+    
     for link in enumerate(tqdm(links, total=len(links))):
         wd_Chrome.get(link[1])
         Team = wd_Chrome.find_element(By.CSS_SELECTOR, 'div.heading')
@@ -56,15 +63,12 @@ def scrapping(links):
         gols_fora_total = 0
     
         try:
-            wd_Chrome.get(link)
             Country = wd_Chrome.find_element(By.CSS_SELECTOR,'div.container__heading')
             Country = wd_Chrome.find_element(By.CSS_SELECTOR,'h2.breadcrumb').text.split('\n')[1]
             Team = wd_Chrome.find_element(By.CSS_SELECTOR, 'div.heading')
             Team = Team.find_element(By.CSS_SELECTOR, 'div.heading__title')
             Team = Team.find_element(By.CSS_SELECTOR, 'div.heading__name').text
-
             jogos = wd_Chrome.find_elements(By.CSS_SELECTOR,'div.event__match--static')
-            
             for jogo in jogos:
                 gols_casa = 0
                 gols_fora = 0
@@ -94,7 +98,7 @@ def scrapping(links):
                         gols_fora_total += gols_fora
                     
                     gols_total = gols_casa_total + gols_fora_total
-                    if(total_jogos>=30):
+                    if(total_jogos>=1):
                         break        
                 except:
                     pass
@@ -111,16 +115,12 @@ def scrapping(links):
                 tabela['Média geral'].append(str(round(avg_geral, 4)).replace(".", ","))
                 tabela['Média em casa'].append(str(round(avg_casa, 4)).replace(".", ","))
                 tabela['Média fora'].append(str(round(avg_fora, 4)).replace(".", ","))
+                print(tabela)
         except:
             pass
-    return tabela
+        
 if __name__ == '__main__':
-    
-    tabela = multiprocessing.Manager().dict({
-        'Time':[],'País':[],'Gols':[],'Jogos':[], 'Média em casa':[],
-        'Média fora':[], 'Média geral':[]
-    })
-    
+
     # Lendo arquivo json e colando na variável dados
     with open('links.json', 'r') as arquivo:
         dados = json.load(arquivo)

@@ -6,7 +6,6 @@ sys.path.insert(0,'/usr/lib/chromium-browser/chromedriver')
 import os
 import numpy as np
 import json
-import multiprocessing
 
 # Utilizando o WebDriver do Selenium
 from selenium import webdriver
@@ -40,7 +39,7 @@ from tqdm import tqdm
 from selenium.webdriver.common.by import By
 
 def scrapping(links):    
-    lock = multiprocessing.Lock()
+
     wd_Chrome.get("https://www.flashscore.com/") 
     time.sleep(2)
     for link in enumerate(tqdm(links, total=len(links))):
@@ -103,23 +102,23 @@ def scrapping(links):
             avg_fora = gols_fora_total/jogos_fora
             avg_geral = gols_total/total_jogos
 
-            with lock:
-                tabela['Time'].append(Team)
-                tabela['País'].append(Country)
-                tabela['Jogos'].append(total_jogos)
-                tabela['Gols'].append(gols_total)
-                tabela['Média geral'].append(str(round(avg_geral, 4)).replace(".", ","))
-                tabela['Média em casa'].append(str(round(avg_casa, 4)).replace(".", ","))
-                tabela['Média fora'].append(str(round(avg_fora, 4)).replace(".", ","))
+            tabela['Time'].append(Team)
+            tabela['País'].append(Country)
+            tabela['Jogos'].append(total_jogos)
+            tabela['Gols'].append(gols_total)
+            tabela['Média geral'].append(str(round(avg_geral, 4)).replace(".", ","))
+            tabela['Média em casa'].append(str(round(avg_casa, 4)).replace(".", ","))
+            tabela['Média fora'].append(str(round(avg_fora, 4)).replace(".", ","))
+            print(Team)
         except:
             pass
-    return tabela
+
 if __name__ == '__main__':
     
-    tabela = multiprocessing.Manager().dict({
+    tabela = {
         'Time':[],'País':[],'Gols':[],'Jogos':[], 'Média em casa':[],
         'Média fora':[], 'Média geral':[]
-    })
+    }       
     
     # Lendo arquivo json e colando na variável dados
     with open('links.json', 'r') as arquivo:
